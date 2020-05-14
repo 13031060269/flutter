@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lwp/base/base_notifier.dart';
+import 'package:flutter_lwp/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 import 'base_notifier_BaseNotifier.auto.g.dart';
@@ -15,10 +16,14 @@ abstract class PageConfig<T extends BaseNotifier> {
 
   bool topSafe() => true;
 
-  ChangeNotifierProvider<T> getProvider() => ChangeNotifierProvider<T>(
+  ChangeNotifierProvider<T> getProvider(Map<String, dynamic> parameters) =>
+      ChangeNotifierProvider<T>(
         create: (context) {
           T provider = autoBaseNotifierCreate<T>();
-          provider.onCreate(context);
+          provider.parameters.addAll(parameters);
+          after(() {
+            provider.onCreate(context);
+          });
           return provider;
         },
       );

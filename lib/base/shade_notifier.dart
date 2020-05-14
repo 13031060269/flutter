@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_lwp/base/safe_notifier.dart';
 import 'package:provider/provider.dart';
 
-class ShadeNotifier with ChangeNotifier {
+class ShadeNotifier extends SafeNotifier {
   bool loading;
   bool error = false;
 
@@ -26,7 +27,7 @@ class ShadeNotifier with ChangeNotifier {
     }
   }
 
-  hideLoading() {
+  dismissLoading() {
     if (loading) {
       loading = false;
       error = false;

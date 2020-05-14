@@ -1,18 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:auto_construction/auto_construction.dart';
-import 'package:flutter_lwp/base/toast_notifier.dart';
+import 'package:flutter_lwp/base/shade_notifier.dart';
 import 'package:flutter_lwp/utils/utils.dart';
 
 import 'base_config.dart';
+import 'safe_notifier.dart';
 
 @AutoConstruction()
-class BaseNotifier with ChangeNotifier, WidgetsBindingObserver {
+class BaseNotifier extends SafeNotifier with WidgetsBindingObserver {
   bool _isStop = false;
+  final Map<String, dynamic> parameters = {};
+  ShadeNotifier _shadeNotifier;
 
-  void onCreate(BuildContext context) {
-    printLog("onCreate");
+  void setShadeNotifier(ShadeNotifier shadeNotifier) {
+    this._shadeNotifier = shadeNotifier;
+  }
+
+  void onCreate(BuildContext context) async {
     WidgetsBinding.instance.addObserver(this);
-    showToast("onCreate");
+    _shadeNotifier?.showLoading();
+    Future.delayed(Duration(seconds: 2), () {
+      _shadeNotifier?.dismissLoading();
+    });
   }
 
   void onStop(BuildContext context) {
@@ -27,8 +36,9 @@ class BaseNotifier with ChangeNotifier, WidgetsBindingObserver {
 
   void reLoad() {}
 
-  startPage<T extends PageConfig>(BuildContext context) async {
-    startActivity<T>(context, this);
+  startPage<T extends PageConfig>(BuildContext context,
+      [Map<String, dynamic> parameters]) async {
+    startActivity<T>(context, notifier: this, parameters: parameters);
   }
 
   @override
@@ -38,6 +48,7 @@ class BaseNotifier with ChangeNotifier, WidgetsBindingObserver {
       case AppLifecycleState.inactive: // 处于这种状态的应用程序应该假设它们可能在任何时候暂停。
         break;
       case AppLifecycleState.resumed: // 应用程序可见，前台
+        onResume();
         break;
       case AppLifecycleState.paused: // 应用程序不可见，后台
         break;
@@ -46,10 +57,11 @@ class BaseNotifier with ChangeNotifier, WidgetsBindingObserver {
     }
   }
 
+  void onResume() {}
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    printLog("dispose");
     super.dispose();
   }
 }

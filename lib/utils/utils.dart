@@ -12,9 +12,13 @@ import 'package:flutter_lwp/widget/activity_widget.dart';
 import 'package:path_provider/path_provider.dart';
 
 startActivity<T extends PageConfig>(BuildContext context,
-    [BaseNotifier notifier]) async {
+    {Map<String, dynamic> parameters, BaseNotifier notifier}) async {
   notifier?.onStop(context);
-  await Utils.push(context, ActivityWidget<T>());
+  var activityWidget = ActivityWidget<T>();
+  if (parameters != null && parameters.length > 0) {
+    activityWidget.parameters.addAll(parameters);
+  }
+  await Utils.push(context, activityWidget);
   notifier?.onRestart(context);
 }
 
@@ -139,4 +143,10 @@ class Utils {
     if (contentLengthFileExists) contentLengthFile.deleteSync();
     return file;
   }
+}
+
+after(Function function) {
+  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    function();
+  });
 }

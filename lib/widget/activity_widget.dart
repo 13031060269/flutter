@@ -12,11 +12,6 @@ import 'view_widget.dart';
 
 class ActivityWidget<P extends PageConfig> extends ViewWidget<P> {
   @override
-  Widget build(BuildContext context) {
-    return page.buildRoot(context, super.build(context));
-  }
-
-  @override
   getProviders() => [
         ChangeNotifierProvider(
           create: (c) => ShadeNotifier(),
@@ -30,17 +25,19 @@ class ActivityWidget<P extends PageConfig> extends ViewWidget<P> {
   getChild() => Stack(
         children: <Widget>[
           page.consumer(),
-          Consumer<ShadeNotifier>(
-              builder: (context, notifier, _) => notifier.error
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      child: CusErrorWidget()..bgColor,
-                      onTap: () {
-                        page.getNotifier(context)?.reLoad();
-                        ShadeNotifier.get(context)?.hideError();
-                      },
-                    )
-                  : notifier.loading ? LoadingWidget() : Container()),
+          Consumer<ShadeNotifier>(builder: (context, notifier, _) {
+            page.getNotifier(context)?.setShadeNotifier(notifier);
+            return notifier.error
+                ? GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    child: CusErrorWidget()..bgColor,
+                    onTap: () {
+                      page.getNotifier(context)?.reLoad();
+                      notifier.hideError();
+                    },
+                  )
+                : notifier.loading ? LoadingWidget() : Container();
+          }),
           Consumer<ToastNotifier>(
               builder: (context, notifier, _) => ToastWidget(notifier.toast))
         ],
