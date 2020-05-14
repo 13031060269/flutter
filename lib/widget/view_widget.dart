@@ -14,6 +14,7 @@ class ViewWidget<P extends PageConfig> extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
+        appBar: page.appBar(),
         body: WillPopScope(
           child: Container(
               color: page.background(),
