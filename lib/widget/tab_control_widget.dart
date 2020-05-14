@@ -49,6 +49,7 @@ class _TabControlState extends State<TabControlWidget>
 
     Widget appBar;
     Widget body = TabBarView(
+      physics: widget.bottom?NeverScrollableScrollPhysics():null,
       controller: _tabController,
       children: widget.bodes,
     );
