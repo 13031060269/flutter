@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutterapp/base/base_notifier.dart';
-import 'package:flutterapp/base/base_page.dart';
-import 'package:flutterapp/widget/tab_control_widget.dart';
+import 'package:flutter_lwp/base/base_notifier.dart';
+import 'package:flutter_lwp/base/base_config.dart';
+import 'package:flutter_lwp/ui/home/second_page.dart';
+import 'package:flutter_lwp/widget/tab_control_widget.dart';
 
-class HomePage with BasePage {
+class HomePage with PageConfig {
   @override
   Widget build(BuildContext context, BaseNotifier value) {
     return TabControlWidget(
@@ -16,7 +17,13 @@ class HomePage with BasePage {
       bottom: false,
       tabChange: (index) {
         print("index==$index");
+        value.startPage<SecondPage>(context);
       },
     );
+  }
+
+  @override
+  bool topSafe() {
+    return false;
   }
 }

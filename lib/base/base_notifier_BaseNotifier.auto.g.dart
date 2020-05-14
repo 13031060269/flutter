@@ -1,5 +1,5 @@
 import 'package:auto_construction/auto_construction.dart';
-import "package:flutterapp/base/base_notifier.dart";
+import "package:flutter_lwp/base/base_notifier.dart";
 T autoBaseNotifierCreate<T extends BaseNotifier>() {
 	var result;
 	switch (autoTypeOf<T>()) {

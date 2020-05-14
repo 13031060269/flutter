@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutterapp/utils/utils.dart';
+import 'package:flutter_lwp/utils/utils.dart';
 const Duration timeout = Duration(seconds: 10);
 
 _printLog(String msg, bool logAble, [StringBuffer sb]) {

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutterapp/utils/utils.dart';
+import 'package:flutter_lwp/utils/utils.dart';
 ToastNotifier toastNotifier = ToastNotifier();
 
-class ToastNotifier extends ChangeNotifier {
+class ToastNotifier with ChangeNotifier {
   String toast;
   Timer timer;
 

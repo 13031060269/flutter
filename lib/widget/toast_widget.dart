@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterapp/utils/utils.dart';
+import 'package:flutter_lwp/utils/utils.dart';
 
 class ToastWidget extends StatelessWidget {
   final String msg;

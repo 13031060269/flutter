@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterapp/ui/home/home_page.dart';
-import 'package:flutterapp/widget/activity_widget.dart';
+
+import 'ui/home/home_page.dart';
+import 'widget/activity_widget.dart';
 
 void main() {
   runApp(MyApp());

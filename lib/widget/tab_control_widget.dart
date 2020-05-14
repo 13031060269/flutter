@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -6,13 +8,17 @@ class TabControlWidget extends StatefulWidget {
   final List<Tab> bars = [];
   final List<Widget> bodes = [];
   final double barHeight;
+  double topHeight = 0;
   final ValueChanged<int> tabChange;
 
   TabControlWidget(List<TabPage> tabBeans,
-      {this.bottom = true, this.barHeight = 60, this.tabChange}) {
+      {this.bottom = true, this.barHeight = 80, this.tabChange}) {
     tabBeans.forEach((element) {
       bars.add(element.tab);
       bodes.add(element.body);
+      if (!bottom) {
+        topHeight = MediaQueryData.fromWindow(window).padding.top;
+      }
     });
   }
 
@@ -49,7 +55,7 @@ class _TabControlState extends State<TabControlWidget>
 
     Widget appBar;
     Widget body = TabBarView(
-      physics: widget.bottom?NeverScrollableScrollPhysics():null,
+      physics: widget.bottom ? NeverScrollableScrollPhysics() : null,
       controller: _tabController,
       children: widget.bodes,
     );
@@ -58,6 +64,7 @@ class _TabControlState extends State<TabControlWidget>
         child: Container(
           color: Colors.blue,
           width: double.infinity,
+          padding: EdgeInsets.only(top: widget.topHeight),
           height: widget.barHeight,
           child: TabBar(
             indicator: BoxDecoration(
@@ -68,7 +75,8 @@ class _TabControlState extends State<TabControlWidget>
             tabs: widget.bars,
           ),
         ),
-        preferredSize: Size(double.infinity, widget.barHeight));
+        preferredSize:
+            Size(double.infinity, widget.barHeight + widget.topHeight));
     if (widget.bottom) {
       bottomNavigationBar = title;
     } else {
@@ -77,9 +85,7 @@ class _TabControlState extends State<TabControlWidget>
 
     return Scaffold(
       appBar: appBar,
-      body: SafeArea(
-        child: body,
-      ),
+      body: body,
       bottomNavigationBar: bottomNavigationBar,
     );
   }

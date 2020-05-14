@@ -6,11 +6,21 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_lwp/base/base_config.dart';
+import 'package:flutter_lwp/base/base_notifier.dart';
+import 'package:flutter_lwp/widget/activity_widget.dart';
 import 'package:path_provider/path_provider.dart';
+
+startActivity<T extends PageConfig>(BuildContext context,
+    [BaseNotifier notifier]) async {
+  notifier?.onStop(context);
+  await Utils.push(context, ActivityWidget<T>());
+  notifier?.onRestart(context);
+}
 
 void printLog(Object obj) {
   if (!kReleaseMode) {
-    print(obj);
+    print("===========$obj==============");
   }
 }
 
