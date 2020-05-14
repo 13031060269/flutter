@@ -12,6 +12,8 @@ import 'base_notifier_BaseNotifier.auto.g.dart';
 abstract class PageConfig<T extends BaseNotifier> {
   Future<bool> willPopCallback() async => true;
 
+  PreferredSizeWidget appBar() => null;
+
   Color background() => Colors.transparent;
 
   bool topSafe() => true;
