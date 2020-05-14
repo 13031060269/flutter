@@ -30,8 +30,14 @@ class _TabControlState extends State<TabControlWidget>
   Widget build(BuildContext context) {
     if (_tabController == null ||
         _tabController.length != widget.bodes.length) {
+      int index = _tabController?.index ?? 0;
+      if (index >= widget.bodes.length) {
+        index = widget.bodes.length - 1;
+      }
       _tabController?.dispose();
-      _tabController = TabController(vsync: this, length: widget.bodes.length);
+      _tabController = TabController(
+          vsync: this, length: widget.bodes.length, initialIndex: index);
+
       _tabController.addListener(() {
         if (_tabController.indexIsChanging) {
           if (widget.tabChange != null) {
@@ -49,6 +55,7 @@ class _TabControlState extends State<TabControlWidget>
     Widget bottomNavigationBar;
     Widget title = PreferredSize(
         child: Container(
+          color: Colors.blue,
           width: double.infinity,
           height: widget.barHeight,
           child: TabBar(
