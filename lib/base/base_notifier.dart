@@ -36,9 +36,9 @@ class BaseNotifier extends SafeNotifier with WidgetsBindingObserver {
 
   void reLoad() {}
 
-  startPage<T extends PageConfig>(BuildContext context,
+  Future<dynamic> startPage<T extends PageConfig>(BuildContext context,
       [Map<String, dynamic> parameters]) async {
-    startActivity<T>(context, notifier: this, parameters: parameters);
+    return startActivity<T>(context, notifier: this, parameters: parameters);
   }
 
   @override

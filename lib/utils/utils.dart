@@ -11,15 +11,16 @@ import 'package:flutter_lwp/base/base_notifier.dart';
 import 'package:flutter_lwp/widget/activity_widget.dart';
 import 'package:path_provider/path_provider.dart';
 
-startActivity<T extends PageConfig>(BuildContext context,
+Future<dynamic> startActivity<T extends PageConfig>(BuildContext context,
     {Map<String, dynamic> parameters, BaseNotifier notifier}) async {
   notifier?.onStop(context);
   var activityWidget = ActivityWidget<T>();
   if (parameters != null && parameters.length > 0) {
     activityWidget.parameters.addAll(parameters);
   }
-  await Utils.push(context, activityWidget);
+  var result = await Utils.push(context, activityWidget);
   notifier?.onRestart(context);
+  return result;
 }
 
 void printLog(Object obj) {

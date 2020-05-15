@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_lwp/base/base_notifier.dart';
 import 'package:flutter_lwp/base/base_config.dart';
-import 'package:flutter_lwp/ui/home/second_page.dart';
+import 'package:flutter_lwp/utils/utils.dart';
 import 'package:flutter_lwp/widget/tab_control_widget.dart';
 
 class HomePage with PageConfig {
@@ -16,8 +16,7 @@ class HomePage with PageConfig {
       ],
       bottom: false,
       tabChange: (index) {
-        print("index==$index");
-        value.startPage<SecondPage>(context);
+        printLog("index====$index");
       },
     );
   }

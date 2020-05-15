@@ -8,7 +8,6 @@ class TabControlWidget extends StatefulWidget {
   final List<Tab> bars = [];
   final List<Widget> bodes = [];
   final double barHeight;
-  double topHeight = 0;
   final ValueChanged<int> tabChange;
 
   TabControlWidget(List<TabPage> tabBeans,
@@ -16,9 +15,6 @@ class TabControlWidget extends StatefulWidget {
     tabBeans.forEach((element) {
       bars.add(element.tab);
       bodes.add(element.body);
-      if (!bottom) {
-        topHeight = MediaQueryData.fromWindow(window).padding.top;
-      }
     });
   }
 
@@ -31,40 +27,50 @@ class TabControlWidget extends StatefulWidget {
 class _TabControlState extends State<TabControlWidget>
     with TickerProviderStateMixin {
   TabController _tabController;
+  PageController _pageController;
 
   @override
   Widget build(BuildContext context) {
+    double topHeight = 0;
+    if (!widget.bottom) {
+      topHeight = MediaQueryData.fromWindow(window).padding.top;
+    }
     if (_tabController == null ||
         _tabController.length != widget.bodes.length) {
+      _pageController?.dispose();
       int index = _tabController?.index ?? 0;
+      _pageController = PageController(initialPage: index);
       if (index >= widget.bodes.length) {
         index = widget.bodes.length - 1;
       }
       _tabController?.dispose();
       _tabController = TabController(
           vsync: this, length: widget.bodes.length, initialIndex: index);
-
       _tabController.addListener(() {
-        if (_tabController.indexIsChanging) {
-          if (widget.tabChange != null) {
-            widget.tabChange(_tabController.index);
-          }
+        if (_pageController.page.round() != _tabController.index) {
+          _pageController.jumpToPage(_tabController.index);
         }
       });
     }
 
     Widget appBar;
-    Widget body = TabBarView(
+    Widget body = PageView(
       physics: widget.bottom ? NeverScrollableScrollPhysics() : null,
-      controller: _tabController,
+      controller: _pageController,
       children: widget.bodes,
+      onPageChanged: (index) async {
+        _tabController.animateTo(index, duration: Duration(milliseconds: 300));
+        if (widget.tabChange != null) {
+          widget.tabChange(_tabController.index);
+        }
+      },
     );
     Widget bottomNavigationBar;
     Widget title = PreferredSize(
         child: Container(
           color: Colors.blue,
           width: double.infinity,
-          padding: EdgeInsets.only(top: widget.topHeight),
+          padding: EdgeInsets.only(top: topHeight),
           height: widget.barHeight,
           child: TabBar(
             indicator: BoxDecoration(
@@ -75,8 +81,7 @@ class _TabControlState extends State<TabControlWidget>
             tabs: widget.bars,
           ),
         ),
-        preferredSize:
-            Size(double.infinity, widget.barHeight + widget.topHeight));
+        preferredSize: Size(double.infinity, widget.barHeight + topHeight));
     if (widget.bottom) {
       bottomNavigationBar = title;
     } else {
@@ -89,6 +94,13 @@ class _TabControlState extends State<TabControlWidget>
       bottomNavigationBar: bottomNavigationBar,
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _pageController?.dispose();
+    _tabController?.dispose();
+  }
 }
 
 class TabPage {
@@ -100,3 +112,5 @@ class TabPage {
   factory TabPage.string(String title, Widget body) =>
       TabPage(Tab(text: title), body);
 }
+
+//typedef BuildChild<T> = Widget Function(BuildContext context, T child);
