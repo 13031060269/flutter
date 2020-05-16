@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lwp/base/base_notifier.dart';
-import 'package:flutter_lwp/base/base_notifier_BaseNotifier.auto.g.dart';
 import 'package:flutter_lwp/base/safe_notifier.dart';
 import 'package:flutter_lwp/base/safe_notifier_SafeNotifier.auto.g.dart';
 import 'package:flutter_lwp/base/shade_notifier.dart';
@@ -88,7 +87,7 @@ abstract class Fragment<T extends BaseNotifier> extends View<T> {
             behavior: HitTestBehavior.opaque,
             child: CusErrorWidget(),
             onTap: () {
-              autoBaseNotifierCreate<T>()?.reLoad();
+              autoSafeNotifierCreate<T>()?.reLoad();
               value.hideError();
             },
           )
