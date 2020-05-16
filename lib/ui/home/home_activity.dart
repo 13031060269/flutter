@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_lwp/base/base_notifier.dart';
-import 'package:flutter_lwp/base/base_config.dart';
 import 'package:flutter_lwp/utils/utils.dart';
 import 'package:flutter_lwp/widget/tab_control_widget.dart';
+import 'package:flutter_lwp/widget/view.dart';
 
-class HomePage with PageConfig {
+class HomeActivity extends Activity {
   @override
-  Widget build(BuildContext context, BaseNotifier value) {
+  Widget builder(BuildContext context, BaseNotifier notifier) {
     return TabControlWidget(
       [
         TabPage.string("title", Text("data")),
@@ -19,10 +19,5 @@ class HomePage with PageConfig {
         printLog("index====$index");
       },
     );
-  }
-
-  @override
-  bool topSafe() {
-    return false;
   }
 }

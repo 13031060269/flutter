@@ -3,7 +3,6 @@ import 'package:auto_construction/auto_construction.dart';
 import 'package:flutter_lwp/base/shade_notifier.dart';
 import 'package:flutter_lwp/utils/utils.dart';
 
-import 'base_config.dart';
 import 'safe_notifier.dart';
 
 @AutoConstruction()
@@ -11,12 +10,17 @@ class BaseNotifier extends SafeNotifier with WidgetsBindingObserver {
   bool _isStop = false;
   final Map<String, dynamic> parameters = {};
   ShadeNotifier _shadeNotifier;
+  BuildContext _context;
+
+  void setContext(BuildContext context) {
+    this._context = context;
+  }
 
   void setShadeNotifier(ShadeNotifier shadeNotifier) {
     this._shadeNotifier = shadeNotifier;
   }
 
-  void onCreate(BuildContext context) async {
+  void onCreate() async {
     WidgetsBinding.instance.addObserver(this);
     _shadeNotifier?.showLoading();
     Future.delayed(Duration(seconds: 2), () {
@@ -24,22 +28,17 @@ class BaseNotifier extends SafeNotifier with WidgetsBindingObserver {
     });
   }
 
-  void onStop(BuildContext context) {
+  void onStop() {
     didChangeAppLifecycleState(AppLifecycleState.paused);
     _isStop = true;
   }
 
-  void onRestart(BuildContext context) {
+  void onRestart() {
     _isStop = false;
     didChangeAppLifecycleState(AppLifecycleState.resumed);
   }
 
   void reLoad() {}
-
-  Future<dynamic> startPage<T extends PageConfig>(BuildContext context,
-      [Map<String, dynamic> parameters]) async {
-    return startActivity<T>(context, notifier: this, parameters: parameters);
-  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {

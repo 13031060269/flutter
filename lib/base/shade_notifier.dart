@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_lwp/base/base_notifier.dart';
 import 'package:flutter_lwp/base/safe_notifier.dart';
 import 'package:provider/provider.dart';
 

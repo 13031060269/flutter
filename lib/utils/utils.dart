@@ -6,22 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_lwp/base/base_config.dart';
-import 'package:flutter_lwp/base/base_notifier.dart';
-import 'package:flutter_lwp/widget/activity_widget.dart';
 import 'package:path_provider/path_provider.dart';
-
-Future<dynamic> startActivity<T extends PageConfig>(BuildContext context,
-    {Map<String, dynamic> parameters, BaseNotifier notifier}) async {
-  notifier?.onStop(context);
-  var activityWidget = ActivityWidget<T>();
-  if (parameters != null && parameters.length > 0) {
-    activityWidget.parameters.addAll(parameters);
-  }
-  var result = await Utils.push(context, activityWidget);
-  notifier?.onRestart(context);
-  return result;
-}
 
 void printLog(Object obj) {
   if (!kReleaseMode) {
@@ -34,6 +19,10 @@ class Utils {
     if (Navigator.canPop(context)) {
       Navigator.pop<T>(context, result);
     }
+  }
+
+  static bool isNotEmpty(Object object) {
+    return !isEmpty(object);
   }
 
   static bool isEmpty(Object object) {

@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'ui/home/home_page.dart';
-import 'widget/activity_widget.dart';
+import 'package:flutter_lwp/ui/home/home_activity.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,8 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      home: ActivityWidget<HomePage>(),
+      title: 'Activity',
+      home: HomeActivity(),
     );
   }
 }

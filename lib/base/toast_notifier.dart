@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_lwp/base/safe_notifier.dart';
 import 'package:flutter_lwp/utils/utils.dart';
+
 ToastNotifier toastNotifier = ToastNotifier();
 
 class ToastNotifier extends SafeNotifier {

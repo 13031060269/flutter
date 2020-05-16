@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 
 class LoadingWidget extends StatelessWidget {
+  final bool loading;
+
+  LoadingWidget([this.loading = true]);
+
   @override
   Widget build(BuildContext context) {
+    if (!loading) {
+      return Container();
+    }
     return SizedBox(
       child: GestureDetector(
         child: Center(
