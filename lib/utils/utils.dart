@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -140,3 +141,5 @@ after(Function function) {
     function();
   });
 }
+
+double stateBarHeight = MediaQueryData.fromWindow(window).padding.top;

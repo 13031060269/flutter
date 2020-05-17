@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lwp/utils/utils.dart';
 
 class TabControlWidget extends StatefulWidget {
   final bool bottom;
@@ -11,7 +12,7 @@ class TabControlWidget extends StatefulWidget {
   final ValueChanged<int> tabChange;
 
   TabControlWidget(List<TabPage> tabBeans,
-      {this.bottom = true, this.barHeight = 80, this.tabChange}) {
+      {this.bottom = true, this.barHeight = 60, this.tabChange}) {
     tabBeans.forEach((element) {
       bars.add(element.tab);
       bodes.add(element.body);
@@ -33,7 +34,7 @@ class _TabControlState extends State<TabControlWidget>
   Widget build(BuildContext context) {
     double topHeight = 0;
     if (!widget.bottom) {
-      topHeight = MediaQueryData.fromWindow(window).padding.top;
+      topHeight = stateBarHeight;
     }
     if (_tabController == null ||
         _tabController.length != widget.bodes.length) {
