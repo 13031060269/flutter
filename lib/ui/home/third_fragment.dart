@@ -7,7 +7,7 @@ class ThirdFragment extends Fragment{
     return Colors.red;
   }
   @override
-  Widget buildBody(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text("$this");
   }
 }

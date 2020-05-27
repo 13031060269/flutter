@@ -11,7 +11,7 @@ class HomeActivity extends Activity {
     return false;
   }
   @override
-  Widget buildBody(BuildContext context) {
+  Widget build(BuildContext context) {
     return TabControlWidget([
       TabPage.string("Tab1", fragment<FirstFragment>(this)),
       TabPage.string("Tab2", fragment<SecondFragment>(this)),

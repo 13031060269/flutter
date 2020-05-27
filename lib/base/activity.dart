@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,14 +14,30 @@ import 'package:provider/provider.dart';
 
 import 'safe_notifier.dart';
 
-const String ACTIVITY = "activity";
+const String PARENT = "parent";
 
 abstract class View extends SafeNotifier {
+  Activity parent;
   final Map<String, dynamic> data = {};
   BuildContext context;
 
+  @mustCallSuper
+  void _onAttach(Activity parent, BuildContext context) {
+    this.parent = parent;
+    this.context = context;
+  }
+
   void onContextChange(BuildContext context, Map<String, dynamic> map) {
     this.context = context;
+  }
+
+  Widget _build(BuildContext context) {
+    return build(context);
+  }
+
+  Future<dynamic> startActivity<T extends Activity>(
+      [Map<String, dynamic> parameters]) async {
+    return parent?.startOther<T>(parameters);
   }
 
   Widget build(BuildContext context);
@@ -28,12 +46,54 @@ abstract class View extends SafeNotifier {
   @override
   void dispose() {
     context = null;
+    parent = null;
     data.clear();
     super.dispose();
   }
 
+  ShadeNotifier shadeNotifier() => ShadeNotifier.get(context);
+
   static T of<T>(BuildContext context) =>
       Provider.of<T>(context, listen: false);
+}
+
+class _Include<T extends View> extends StatelessWidget {
+  final Map<String, dynamic> _data = {};
+
+  @override
+  Widget build(BuildContext context) {
+    List<_Config> configs = [];
+    List<InheritedProvider> providers = [];
+    List<Consumer> consumers = [];
+    configs.add(_Config<T>((context, value, child) {
+      after(() {
+        value.onContextChange(context, _data);
+        _data.clear();
+      });
+      return value._build(context);
+    }, ChangeNotifierProvider<T>(
+      create: (context) {
+        var provider = autoSafeNotifierCreate<T>()..data.addAll(_data);
+        after(() {
+          provider._onAttach(_data.remove(PARENT), context);
+          _data.clear();
+        });
+        return provider;
+      },
+    )));
+    _addConfig(configs);
+    configs.forEach((element) {
+      providers.add(element.provider());
+      consumers.add(element.child());
+    });
+    return MultiProvider(
+        providers: providers,
+        child: Stack(
+          children: <Widget>[...consumers],
+        ));
+  }
+
+  _addConfig(List<_Config> configs) {}
 }
 
 abstract class Fragment extends View {
@@ -51,15 +111,14 @@ abstract class Fragment extends View {
 
   void reLoad() {}
 
-  @mustCallSuper
-  void onCreate(BuildContext context) async {
-    this.context = context;
-    var activity = data[ACTIVITY] as Activity;
-    activity?._fragments?.add(this);
+  @override
+  void _onAttach(Activity parent, BuildContext context) {
+    super._onAttach(parent, context);
+    parent?.addFragment(this);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget _build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: style(),
       child: Scaffold(
@@ -72,7 +131,7 @@ abstract class Fragment extends View {
                 child: Container(
                   width: double.infinity,
                   height: double.infinity,
-                  child: buildBody(context),
+                  child: build(context),
                 ),
               )),
           onWillPop: onWillPop,
@@ -80,8 +139,6 @@ abstract class Fragment extends View {
       ),
     );
   }
-
-  Widget buildBody(BuildContext context);
 
   @mustCallSuper
   void onRestart() {
@@ -96,15 +153,38 @@ abstract class Fragment extends View {
   appBar() {}
 }
 
+class _IncludeFragment<T extends Fragment> extends _Include<T> {
+  @override
+  _addConfig(List<_Config> configs) {
+    super._addConfig(configs);
+    configs.add(_Config<ShadeNotifier>((context, value, child) => value.error
+        ? GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            child: CusErrorWidget(),
+            onTap: () {
+              View.of<T>(context)?.reLoad();
+              value.hideError();
+            },
+          )
+        : LoadingWidget(value.loading)));
+  }
+}
+
 abstract class Activity extends Fragment with WidgetsBindingObserver {
-  List<Fragment> _fragments = [];
+  HashSet<Fragment> _fragments = HashSet();
 
   @override
   bool topSafe() => true;
 
+  void addFragment(Fragment fragment) {
+    if (fragment != this) {
+      _fragments.add(fragment);
+    }
+  }
+
   @override
-  void onCreate(BuildContext context) {
-    super.onCreate(context);
+  void _onAttach(Activity parent, BuildContext context) {
+    super._onAttach(parent, context);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -145,69 +225,14 @@ abstract class Activity extends Fragment with WidgetsBindingObserver {
     _fragments.clear();
     super.dispose();
   }
-}
 
-class _Include<T extends View> extends StatelessWidget {
-  final Map<String, dynamic> _data = {};
-
-  @override
-  Widget build(BuildContext context) {
-    List<_Config> configs = [];
-    List<InheritedProvider> providers = [];
-    List<Consumer> consumers = [];
-    configs.add(_Config<T>((context, value, child) {
-      after(() {
-        value.onContextChange(context, _data);
-        _data.clear();
-      });
-      return value.build(context);
-    }, ChangeNotifierProvider<T>(
-      create: (context) {
-        var provider = autoSafeNotifierCreate<T>();
-        provider.data.addAll(_data);
-        _data.clear();
-        after(() {
-          onCreate(context, provider);
-        });
-        return provider;
-      },
-    )));
-    _addConfig(configs);
-    configs.forEach((element) {
-      providers.add(element.provider());
-      consumers.add(element.child());
-    });
-    return MultiProvider(
-        providers: providers,
-        child: Stack(
-          children: <Widget>[...consumers],
-        ));
-  }
-
-  onCreate(BuildContext buildContext, T value) {}
-
-  _addConfig(List<_Config> configs) {}
-}
-
-class _IncludeFragment<T extends Fragment> extends _Include<T> {
-  @override
-  onCreate(BuildContext buildContext, T value) {
-    value.onCreate(buildContext);
-  }
-
-  @override
-  _addConfig(List<_Config> configs) {
-    super._addConfig(configs);
-    configs.add(_Config<ShadeNotifier>((context, value, child) => value.error
-        ? GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            child: CusErrorWidget(),
-            onTap: () {
-              View.of<T>(context)?.reLoad();
-              value.hideError();
-            },
-          )
-        : LoadingWidget(value.loading)));
+  Future<dynamic> startOther<T extends Activity>(
+      [Map<String, dynamic> parameters]) async {
+    Activity activity = this;
+    while (activity.parent != null) {
+      activity = activity.parent;
+    }
+    return startActivity<T>(activity, parameters);
   }
 }
 
@@ -216,7 +241,8 @@ class _IncludeActivity<T extends Activity> extends _IncludeFragment<T> {
   _addConfig(List<_Config> configs) {
     super._addConfig(configs);
     configs.add(_Config<ToastNotifier>(
-        (context, value, child) => ToastWidget(value.toast)));
+        (context, value, child) => ToastWidget(value.toast),
+        ChangeNotifierProvider<ToastNotifier>.value(value: toastNotifier)));
   }
 }
 
@@ -235,31 +261,31 @@ class _Config<T extends SafeNotifier> {
       );
 }
 
-Widget view<T extends View>({
+Widget view<T extends View>([
+  Activity parent,
   Map<String, dynamic> parameters,
-}) =>
-    _Include<T>().._data.addAll(parameters ?? {});
+]) =>
+    _Include<T>().._data.addAll({PARENT: activity, ...parameters ?? {}});
 
 Widget fragment<T extends Fragment>(
-  Activity activity, {
+  Activity activity, [
   Map<String, dynamic> parameters,
-}) {
-  var includeFragment = _IncludeFragment<T>()
-    .._data.addAll({ACTIVITY: activity, ...parameters ?? {}});
-  return includeFragment;
-}
+]) =>
+    _IncludeFragment<T>()
+      .._data.addAll({PARENT: activity, ...parameters ?? {}});
 
 Widget activity<T extends Activity>([Map<String, dynamic> parameters]) =>
     _IncludeActivity<T>().._data.addAll(parameters ?? {});
 
-Future<dynamic> startActivity<T extends Activity>(Activity act,
-    {Map<String, dynamic> parameters}) async {
-  assert(act != null, "act 不能为null");
-  act.onStop();
+Future<dynamic> startActivity<T extends Activity>(Activity parent,
+    [Map<String, dynamic> parameters]) async {
+  parent.onStop();
   var result = await Navigator.push(
-    act.context,
-    CupertinoPageRoute(builder: (contextBuild) => activity<T>(parameters)),
+    parent.context,
+    CupertinoPageRoute(
+        builder: (contextBuild) =>
+            activity<T>({PARENT: parent, ...parameters ?? {}})),
   );
-  act.onRestart();
+  parent.onRestart();
   return result;
 }

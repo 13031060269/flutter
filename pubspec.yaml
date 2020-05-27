@@ -35,7 +35,7 @@ dependencies:
   #  webview_flutter:
   #  cached_network_image:
   #  flutter_advanced_networkimage:
-  path_provider:
+  path_provider: 1.6.9
 dev_dependencies:
   flutter_test:
     sdk: flutter
