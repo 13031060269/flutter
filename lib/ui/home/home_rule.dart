@@ -1,20 +1,29 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_lwp/base/data_life.dart';
-import 'package:flutter_lwp/base/toast_notifier.dart';
 
-class HomeRule extends ViewRule<DataLifeWhole> {
+class HomeRule extends ViewRule<HomeDataLife> {
   @override
   bool topSafe() {
     return true;
   }
+
   @override
-  Widget build(BuildContext context, DataLifeWhole view) {
+  Widget build(BuildContext context, DataLifeWhole dataLifeWhole) {
     return GestureDetector(
       onTap: () {
-        showToast("msg");
+        dataLifeWhole.shadeNotifier()?.showError();
       },
       child: Text("$this"),
     );
+  }
+}
+
+class HomeDataLife extends DataLifeWhole {
+  @override
+  void reLoad() {
+    shadeNotifier()?.showLoading();
+    Future.delayed(Duration(seconds: 2), () {
+      shadeNotifier()?.dismissLoading();
+    });
   }
 }

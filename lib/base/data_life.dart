@@ -5,12 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lwp/base/safe_notifier_SafeNotifier.auto.g.dart';
-import 'package:flutter_lwp/base/shade_notifier.dart';
-import 'package:flutter_lwp/base/toast_notifier.dart';
+import 'package:flutter_lwp/base/shade.dart';
+import 'package:flutter_lwp/base/toast.dart';
 import 'package:flutter_lwp/utils/utils.dart';
-import 'package:flutter_lwp/widget/error_widget.dart';
-import 'package:flutter_lwp/widget/loading_widget.dart';
-import 'package:flutter_lwp/widget/toast_widget.dart';
 import 'package:provider/provider.dart';
 
 import 'safe_notifier.dart';
@@ -18,20 +15,13 @@ import 'safe_notifier.dart';
 const String PARENT = "parent";
 const String ROUTE = "route";
 
-_Config _shade<T>() =>
-    _Config<ShadeNotifier>((context, value, child) => value.error
-        ? GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            child: CusErrorWidget(),
-            onTap: () {
-              (DataLife.of<T>(context) as DataLifePart)?.reLoad();
-              value.hideError();
-            },
-          )
-        : LoadingWidget(value.loading));
+_Config _shade<T>() => _Config<ShadeNotifier>(
+    (context, value, child) => ShadeWidget.simple(value, () {
+          (DataLife.of<T>(context) as DataLifeBar)?.reLoad();
+          value.hideError();
+        }));
 
-_Config _toast() => _Config<ToastNotifier>(
-    (context, value, child) => ToastWidget(value.toast),
+_Config _toast() => _Config<ToastNotifier>((context, value, child) => toast(),
     ChangeNotifierProvider<ToastNotifier>.value(value: toastNotifier));
 
 abstract class ViewRule<T extends DataLife> {
@@ -47,7 +37,7 @@ abstract class ViewRule<T extends DataLife> {
 
   Widget _build(BuildContext context, T dataLife) {
     var widget = build(context, dataLife);
-    if (<T>[] is List<DataLifePart>) {
+    if (isMatch<T, DataLifeBar>()) {
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: style(),
         child: Scaffold(
@@ -99,9 +89,9 @@ class DataLife extends SafeNotifier {
 
   void onContextChange(Map<String, dynamic> map) {}
 
-  Future<dynamic> startActivity<T extends DataLifeWhole>(ViewRule<T> help,
+  Future<dynamic> startRule<T extends DataLifeWhole>(ViewRule<T> help,
       [Map<String, dynamic> parameters]) async {
-    return parent?.startActivity<T>(help, parameters);
+    return parent?.startRule<T>(help, parameters);
   }
 
   @mustCallSuper
@@ -124,10 +114,9 @@ typedef AddConfig = Function(List<_Config> configs);
 
 class _Include<T extends DataLife> extends StatefulWidget {
   final Map<String, dynamic> _data;
-  final AddConfig _config;
   final ViewRule _help;
 
-  _Include(this._data, this._help, [this._config]);
+  _Include(this._data, this._help);
 
   @override
   _IncludeState createState() {
@@ -140,7 +129,7 @@ class _IncludeState<T extends DataLife> extends State<_Include>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return _IncludeLess<T>(widget._data, widget._help, widget._config);
+    return _IncludeLess<T>(widget._data, widget._help);
   }
 
   @override
@@ -149,17 +138,13 @@ class _IncludeState<T extends DataLife> extends State<_Include>
 
 class _IncludeLess<T extends DataLife> extends StatelessWidget {
   final Map<String, dynamic> _data;
-  final AddConfig _config;
   final ViewRule _help;
 
-  _IncludeLess(this._data, this._help, [this._config]);
+  _IncludeLess(this._data, this._help);
 
   @override
   Widget build(BuildContext context) {
-    List<_Config> configs = [];
-    List<InheritedProvider> providers = [];
-    List<Consumer> consumers = [];
-    configs.add(_Config<T>((context, value, child) {
+    _Config config = _Config<T>((context, value, child) {
       value.context = context;
       after(() {
         if (!kReleaseMode) {
@@ -180,23 +165,39 @@ class _IncludeLess<T extends DataLife> extends StatelessWidget {
         }
         return provider;
       },
-    )));
-    if (_config != null) {
-      _config(configs);
+    ));
+    if (isMatch<T, DataLifeBar>()) {
+      List<InheritedProvider> providers = [config.provider()];
+      List<Consumer> consumers = [config.child()];
+      config = _shade<T>();
+      providers.add(config.provider());
+      consumers.add(config.child());
+      if (isMatch<T, DataLifeWhole>()) {
+        config = _toast();
+        providers.add(config.provider());
+        consumers.add(config.child());
+        return Scaffold(
+          body: MultiProvider(
+              providers: providers,
+              child: Stack(
+                children: <Widget>[...consumers],
+              )),
+        );
+      } else {
+        return MultiProvider(
+            providers: providers,
+            child: Stack(
+              children: <Widget>[...consumers],
+            ));
+      }
+    } else {
+      return MultiProvider(
+          providers: [config.provider()], child: config.child());
     }
-    configs.forEach((element) {
-      providers.add(element.provider());
-      consumers.add(element.child());
-    });
-    return MultiProvider(
-        providers: providers,
-        child: Stack(
-          children: <Widget>[...consumers],
-        ));
   }
 }
 
-class DataLifePart extends DataLife {
+class DataLifeBar extends DataLife {
   bool _isStop = false;
 
   bool get isStop => _isStop;
@@ -220,15 +221,15 @@ class DataLifePart extends DataLife {
   }
 }
 
-class DataLifeWhole extends DataLifePart with WidgetsBindingObserver {
-  HashSet<DataLifePart> _fragments = HashSet();
+class DataLifeWhole extends DataLifeBar with WidgetsBindingObserver {
+  HashSet<DataLifeBar> _fragments = HashSet();
   WrapRoute _wrapRoute;
 
   DataLifeWhole() {
     tasks.add(this);
   }
 
-  void addFragment(DataLifePart fragment) {
+  void addFragment(DataLifeBar fragment) {
     if (fragment != this) {
       _fragments.add(fragment);
     }
@@ -245,9 +246,9 @@ class DataLifeWhole extends DataLifePart with WidgetsBindingObserver {
   }
 
   @override
-  Future<dynamic> startActivity<T extends DataLifeWhole>(ViewRule<T> help,
+  Future<dynamic> startRule<T extends DataLifeWhole>(ViewRule<T> help,
       [Map<String, dynamic> parameters]) async {
-    return _launchActivity<T>(this, help, parameters: parameters);
+    return _launchRule<T>(this, help, parameters: parameters);
   }
 
   @override
@@ -314,36 +315,25 @@ class _Config<T extends SafeNotifier> {
       );
 }
 
-Widget view<T extends DataLife>(ViewRule<T> rule,
+Widget rule<T extends DataLife>(ViewRule<T> rule,
     {DataLifeWhole parent,
     Map<String, dynamic> parameters = const {},
     bool less = false}) {
-  List<_Config> configs = [];
-  if (<T>[] is List<DataLifePart>) {
-    configs.add(_shade<T>());
-  }
-  if (<T>[] is List<DataLifeWhole>) {
-    configs.add(_toast());
-  }
   if (less) {
-    return _IncludeLess<T>({PARENT: parent, ...parameters}, rule, (list) {
-      list.addAll(configs);
-    });
+    return _IncludeLess<T>({PARENT: parent, ...parameters}, rule);
   } else {
-    return _Include<T>({PARENT: parent, ...parameters}, rule, (list) {
-      list.addAll(configs);
-    });
+    return _Include<T>({PARENT: parent, ...parameters}, rule);
   }
 }
 
-Future<dynamic> _launchActivity<T extends DataLifeWhole>(
-    DataLifeWhole parent, ViewRule<T> rule,
+Future<dynamic> _launchRule<T extends DataLifeWhole>(
+    DataLifeWhole parent, ViewRule<T> mRule,
     {Map<String, dynamic> parameters = const {}}) async {
   printLog(T);
   parent.onStop();
   WrapRoute wrapRoute = WrapRoute();
   var route = CupertinoPageRoute(
-      builder: (contextBuild) => view<T>(rule,
+      builder: (contextBuild) => rule<T>(mRule,
           parent: parent,
           parameters: {ROUTE: wrapRoute, ...parameters ?? {}},
           less: true));
@@ -357,6 +347,10 @@ Future<dynamic> _launchActivity<T extends DataLifeWhole>(
 }
 
 HashSet<DataLifeWhole> tasks = HashSet();
+
+bool isMatch<T, D>() {
+  return <T>[] is List<D>;
+}
 
 class WrapRoute {
   Route route;

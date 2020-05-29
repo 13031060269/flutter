@@ -1,10 +1,36 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_lwp/base/safe_notifier.dart';
 import 'package:flutter_lwp/utils/utils.dart';
 
-class ToastWidget extends StatelessWidget {
+ToastNotifier toastNotifier = ToastNotifier();
+
+class ToastNotifier extends SafeNotifier {
+  String toast;
+  Timer timer;
+
+  _showToast(String msg) async {
+    if (Utils.isEmpty(msg)) return;
+    toast = msg;
+    notifyListeners();
+    timer?.cancel();
+    timer = Timer(Duration(seconds: 2), () {
+      toast = null;
+      notifyListeners();
+    });
+  }
+}
+
+void showToast(String msg) {
+  toastNotifier._showToast(msg);
+}
+
+class _ToastWidget extends StatelessWidget {
   final String msg;
 
-  ToastWidget(this.msg);
+  _ToastWidget(this.msg);
 
   @override
   Widget build(BuildContext context) {
@@ -30,3 +56,5 @@ class ToastWidget extends StatelessWidget {
         ));
   }
 }
+
+Widget toast() => _ToastWidget(toastNotifier.toast);
