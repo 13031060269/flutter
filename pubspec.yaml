@@ -35,7 +35,7 @@ dependencies:
   #  webview_flutter:
   #  cached_network_image:
   #  flutter_advanced_networkimage:
-  path_provider: 1.6.9
+  path_provider:
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -44,7 +44,10 @@ dev_dependencies:
   auto_construction:
     git:
       url: 'https://github.com/13031060269/auto_construction.git'
-
+#  flutter_boost:
+#    git:
+#      url: 'https://github.com/alibaba/flutter_boost.git'
+#      ref: 'task/task_v1.12.13_support_hotfixes'
   source_gen: '>=0.8.0'
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

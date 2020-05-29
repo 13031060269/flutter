@@ -1,39 +1,29 @@
 import 'package:auto_construction/auto_construction.dart';
 import "package:flutter_lwp/base/safe_notifier.dart";
-import "package:flutter_lwp/ui/home/second_fragment.dart";
 import "package:flutter_lwp/base/toast_notifier.dart";
-import "package:flutter_lwp/ui/home/home_activity.dart";
-import "package:flutter_lwp/ui/home/second_activity.dart";
-import "package:flutter_lwp/ui/home/third_fragment.dart";
 import "package:flutter_lwp/base/shade_notifier.dart";
-import "package:flutter_lwp/ui/home/first_fragment.dart";
+import "package:flutter_lwp/base/data_life.dart";
 T autoSafeNotifierCreate<T extends SafeNotifier>() {
 	var result;
 	var type = autoTypeOf<T>();
 	switch (type) {
-		case SecondActivity:
-			result = SecondActivity();
+		case DataLifeWhole:
+			result = DataLifeWhole();
 			break;
-		case SafeNotifier:
-			result = SafeNotifier();
-			break;
-		case ShadeNotifier:
-			result = ShadeNotifier();
-			break;
-		case HomeActivity:
-			result = HomeActivity();
+		case DataLife:
+			result = DataLife();
 			break;
 		case ToastNotifier:
 			result = ToastNotifier();
 			break;
-		case ThirdFragment:
-			result = ThirdFragment();
+		case ShadeNotifier:
+			result = ShadeNotifier();
 			break;
-		case SecondFragment:
-			result = SecondFragment();
+		case DataLifePart:
+			result = DataLifePart();
 			break;
-		case FirstFragment:
-			result = FirstFragment();
+		case SafeNotifier:
+			result = SafeNotifier();
 			break;
 		default:
 			throw Exception("$type 无法实例化");
