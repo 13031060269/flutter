@@ -110,18 +110,10 @@ class _RefreshGridViewState extends State<RefreshGridView> {
     );
   }
 
-  ///默认横向分割线
+  ///默认分割线
   Widget _separatorXBuilder(BuildContext context, int index) {
     return Container(
       height: 1,
-      color: Colors.red,
-    );
-  }
-
-  ///默认纵向分割线
-  Widget _separatorYBuilder(BuildContext context, int index) {
-    return VerticalDivider(
-      width: 1,
       color: Colors.red,
     );
   }
