@@ -35,7 +35,8 @@ dependencies:
   #  webview_flutter:
   #  cached_network_image:
   #  flutter_advanced_networkimage:
-  path_provider:
+  path_provider: ^0.4.1
+  flutter_staggered_grid_view: ^0.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
