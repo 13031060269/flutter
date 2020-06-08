@@ -79,7 +79,7 @@ class DataLife extends SafeNotifier {
     return _parent;
   }
 
-  final Map<String, dynamic> data = {};
+  final Map<String, dynamic> parameters = {};
   BuildContext context;
 
   @mustCallSuper
@@ -99,7 +99,7 @@ class DataLife extends SafeNotifier {
   void dispose() {
     context = null;
     _parent = null;
-    data.clear();
+    parameters.clear();
     printLog(this);
     super.dispose();
   }
@@ -156,7 +156,7 @@ class _IncludeLess<T extends DataLife> extends StatelessWidget {
       return _help._build(context, value);
     }, ChangeNotifierProvider<T>(
       create: (context) {
-        var provider = autoSafeNotifierCreate<T>()..data.addAll(_data);
+        var provider = autoSafeNotifierCreate<T>()..parameters.addAll(_data);
         if (kReleaseMode) {
           after(() {
             provider._onAttach(_data.remove(PARENT));
@@ -254,7 +254,7 @@ class DataLifeWhole extends DataLifeBar with WidgetsBindingObserver {
   @override
   void _onAttach(DataLifeWhole parent) {
     super._onAttach(parent);
-    _wrapRoute = data[ROUTE];
+    _wrapRoute = parameters[ROUTE];
     WidgetsBinding.instance.addObserver(this);
   }
 
