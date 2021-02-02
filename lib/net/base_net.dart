@@ -45,15 +45,6 @@ class BaseNet {
       var _httpClient = HttpClient()
         ..autoUncompress = false
         ..connectionTimeout = timeout;
-      if (host == null) {
-        httpUri = new Uri.http("new-car-aos.oss-cn-shenzhen.aliyuncs.com",
-            "/conf/app-setup/hosts.txt");
-        var request = await _httpClient.openUrl("GET", httpUri);
-        var response = await request.close();
-        var responseBody = await response.transform(Utf8Decoder()).join();
-        var json = jsonDecode(responseBody);
-        ip = host = json["mini.server.com"];
-      }
       httpUri = new Uri.http("$host:8001", uri, parameters);
 
       _printLog("========url========", logAble, stringBuffer);
@@ -87,7 +78,6 @@ class BaseNet {
         request.contentLength = convert.length;
         request.add(convert);
       }
-
       var response = await request.close();
       var responseBody = await response.transform(Utf8Decoder()).join();
       if (response.statusCode != HttpStatus.ok) {

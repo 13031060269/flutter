@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lwp/utils/utils.dart';
+import 'package:flutter_lwp/widget/state_rule_widget.dart';
 
 class TabControlWidget extends StatefulWidget {
   final bool bottom;
@@ -15,7 +16,7 @@ class TabControlWidget extends StatefulWidget {
       {this.bottom = true, this.barHeight = 60, this.tabChange}) {
     tabBeans.forEach((element) {
       bars.add(element.tab);
-      bodes.add(element.body);
+      bodes.add(StateRuleWidget(element.body));
     });
   }
 
