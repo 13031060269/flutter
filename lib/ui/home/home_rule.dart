@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lwp/base/data_life.dart';
+import 'package:flutter_lwp/utils/utils.dart';
 import 'package:flutter_lwp/widget/refresh_grid_view.dart';
 import 'package:flutter_lwp/widget/tab_control_widget.dart';
 
@@ -23,7 +24,15 @@ class HomeRule extends ViewRule<HomeDataLife> {
             onRefresh: dataLifeWhole.onRefresh,
             isLastPage: dataLifeWhole.isLastPage(),
           )),
-      TabPage.string("第二个", Text("data"))
+      TabPage.string(
+          "第二个",
+          GestureDetector(
+            onTap: () async {
+              await Future.delayed(Duration(seconds: 10));
+              printLog("11111111111111111obj");
+            },
+            child: CircularProgressIndicator(),
+          ))
     ]);
   }
 
